@@ -1,7 +1,7 @@
 from fastapi import Depends, Body
 
 import schemas
-from chalicelib.core import sessions, events, jobs, projects
+from chalicelib.core import sessions, events, jobs, projects, heatmaps, custom_metrics, product_analytics
 from or_dependencies import OR_context
 from routers.base import get_routers
 
@@ -99,3 +99,123 @@ def create_project(data: schemas.CreateProjectSchema = Body(...),
     )
     del record["data"]['projectId']
     return record
+
+
+@app_apikey.post('/v1/{projectKey}/analytics/custom', tags=["api", "analytics"])
+def get_custom_metrics(projectKey: str, data: schemas.CardSchema = Body(...),
+                       context: schemas.CurrentContext = Depends(OR_context)):
+    return {
+        "data": custom_metrics.get_chart(
+            project_id=context.project.project_id,
+            data=data,
+            user_id=context.user_id
+        )
+    }
+
+
+@app_apikey.post('/v1/{projectKey}/analytics/journey', tags=["api", "analytics"])
+def get_user_journey(projectKey: str, data: schemas.PathAnalysisSchema = Body(...),
+                     context: schemas.CurrentContext = Depends(OR_context)):
+    return {
+        "data": product_analytics.path_analysis(
+            project_id=context.project.project_id,
+            data=data
+        )
+    }
+
+
+@app_apikey.post('/v1/{projectKey}/analytics/retention', tags=["api", "analytics"])
+def get_user_retention(projectKey: str, data: schemas.MetricPayloadSchema = Body(...),
+                       context: schemas.CurrentContext = Depends(OR_context)):
+    return {
+        "data": product_analytics.users_retention(
+            project_id=context.project.project_id,
+            **data.dict()
+        )
+    }
+
+
+@app_apikey.post('/v1/{projectKey}/heatmaps/url', tags=["api", "heatmaps"])
+def get_heatmaps_by_url(projectKey: str, data: schemas.GetHeatMapPayloadSchema = Body(...),
+                        context: schemas.CurrentContext = Depends(OR_context)):
+    return {
+        "data": heatmaps.get_by_url(
+            project_id=context.project.project_id,
+            data=data
+        )
+    }
+
+
+@app_apikey.post('/v1/{projectKey}/sessions/{sessionId}/heatmaps', tags=["api", "heatmaps"])
+def get_session_heatmaps(projectKey: str, sessionId: int,
+                         data: schemas.GetHeatMapPayloadSchema = Body(...),
+                         context: schemas.CurrentContext = Depends(OR_context)):
+    return {
+        "data": heatmaps.get_x_y_by_url_and_session_id(
+            project_id=context.project.project_id,
+            session_id=sessionId,
+            data=data
+        )
+    }
+
+
+@app_apikey.post('/v1/{projectKey}/sessions/{sessionId}/clickmaps', tags=["api", "heatmaps"])
+def get_session_clickmaps(projectKey: str, sessionId: int,
+                          data: schemas.GetClickMapPayloadSchema = Body(...),
+                          context: schemas.CurrentContext = Depends(OR_context)):
+    return {
+        "data": heatmaps.get_selectors_by_url_and_session_id(
+            project_id=context.project.project_id,
+            session_id=sessionId,
+            data=data
+        )
+    }
+
+
+@app_apikey.get('/v1/{projectKey}/sessions/{sessionId}/replay', tags=["api", "replay"])
+def get_session_replay(projectKey: str, sessionId: int,
+                       context: schemas.CurrentContext = Depends(OR_context)):
+    return {
+        "data": sessions.get_session_replay(
+            project_id=context.project.project_id,
+            session_id=sessionId,
+            full_data=True,
+            include_fav_viewed=True,
+            group_metadata=True
+        )
+    }
+
+
+@app_apikey.post('/v1/{projectKey}/sessions/search', tags=["api", "sessions"])
+def search_sessions(projectKey: str, data: schemas.SessionsSearchPayloadSchema = Body(...),
+                    context: schemas.CurrentContext = Depends(OR_context)):
+    return {
+        "data": sessions.search_sessions(
+            data=data,
+            project_id=context.project.project_id,
+            user_id=context.user_id,
+            platform=context.project.platform
+        )
+    }
+
+
+@app_apikey.post('/v1/{projectKey}/performance/web-vitals', tags=["api", "performance"])
+def get_web_vitals(projectKey: str, data: schemas.MetricPayloadSchema = Body(...),
+                   context: schemas.CurrentContext = Depends(OR_context)):
+    return {
+        "data": custom_metrics.get_web_vitals(
+            project_id=context.project.project_id,
+            **data.dict()
+        )
+    }
+
+
+@app_apikey.post('/v1/{projectKey}/performance/resources', tags=["api", "performance"])
+def get_resources_metrics(projectKey: str, data: schemas.MetricPayloadSchema = Body(...),
+                          context: schemas.CurrentContext = Depends(OR_context)):
+    return {
+        "data": custom_metrics.get_resources_metrics(
+            project_id=context.project.project_id,
+            **data.dict()
+        )
+    }

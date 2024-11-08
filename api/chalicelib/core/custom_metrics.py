@@ -251,7 +251,8 @@ def get_sessions(project_id, user_id, data: schemas.CardSessionsSchema):
     for s in data.series:
         if len(data.filters) > 0:
             s.filter.filters += data.filters
-            s.filter = schemas.SessionsSearchPayloadSchema(**s.filter.model_dump(by_alias=True))
+            s.filter = schemas.SessionsSearchPayloadSchema(
+                **s.filter.model_dump(by_alias=True))
 
         results.append({"seriesId": None, "seriesName": s.name,
                         **sessions.search_sessions(data=s.filter, project_id=project_id, user_id=user_id)})
@@ -264,14 +265,16 @@ def __get_funnel_issues(project_id: int, user_id: int, data: schemas.CardFunnel)
         return []
     data.series[0].filter.startTimestamp = data.startTimestamp
     data.series[0].filter.endTimestamp = data.endTimestamp
-    data = funnels.get_issues_on_the_fly_widget(project_id=project_id, data=data.series[0].filter)
+    data = funnels.get_issues_on_the_fly_widget(
+        project_id=project_id, data=data.series[0].filter)
     return data
 
 
 def __get_path_analysis_issues(project_id: int, user_id: int, data: schemas.CardPathAnalysis):
     if len(data.filters) > 0 or len(data.series) > 0:
         filters = [f.model_dump(by_alias=True) for f in data.filters] \
-                  + [f.model_dump(by_alias=True) for f in data.series[0].filter.filters]
+            + [f.model_dump(by_alias=True)
+               for f in data.series[0].filter.filters]
     else:
         return []
 
@@ -296,7 +299,8 @@ def __get_path_analysis_issues(project_id: int, user_id: int, data: schemas.Card
         search_data.events.append(schemas.SessionSearchEventSchema2(type=s.type,
                                                                     operator=schemas.SearchEventOperator.NOT_ON,
                                                                     value=s.value))
-    result = sessions.search_table_of_individual_issues(project_id=project_id, data=search_data)
+    result = sessions.search_table_of_individual_issues(
+        project_id=project_id, data=search_data)
     return result
 
 
@@ -336,18 +340,21 @@ def create_card(project_id, user_id, data: schemas.CardSchema, dashboard=False):
                 if session_data is not None:
                     session_data = {"sessionId": session_data["sessionId"]}
 
-        _data = {"session_data": json.dumps(session_data) if session_data is not None else None}
+        _data = {"session_data": json.dumps(
+            session_data) if session_data is not None else None}
         for i, s in enumerate(data.series):
             for k in s.model_dump().keys():
                 _data[f"{k}_{i}"] = s.__getattribute__(k)
             _data[f"index_{i}"] = i
             _data[f"filter_{i}"] = s.filter.json()
         series_len = len(data.series)
-        params = {"user_id": user_id, "project_id": project_id, **data.model_dump(), **_data}
+        params = {"user_id": user_id, "project_id": project_id,
+                  **data.model_dump(), **_data}
         params["default_config"] = json.dumps(data.default_config.model_dump())
         params["card_info"] = None
         if data.metric_type == schemas.MetricType.PATH_ANALYSIS:
-            params["card_info"] = json.dumps(__get_path_analysis_card_info(data=data))
+            params["card_info"] = json.dumps(
+                __get_path_analysis_card_info(data=data))
 
         query = """INSERT INTO metrics (project_id, user_id, name, is_public,
                             view_type, metric_type, metric_of, metric_value,
@@ -410,12 +417,14 @@ def update_card(metric_id, user_id, project_id, data: schemas.CardSchema):
     params["card_info"] = None
     params["session_data"] = json.dumps(metric["data"])
     if data.metric_type == schemas.MetricType.PATH_ANALYSIS:
-        params["card_info"] = json.dumps(__get_path_analysis_card_info(data=data))
+        params["card_info"] = json.dumps(
+            __get_path_analysis_card_info(data=data))
     elif data.metric_type == schemas.MetricType.HEAT_MAP:
         if data.session_id is not None:
             params["session_data"] = json.dumps({"sessionId": data.session_id})
         elif metric.get("data") and metric["data"].get("sessionId"):
-            params["session_data"] = json.dumps({"sessionId": metric["data"]["sessionId"]})
+            params["session_data"] = json.dumps(
+                {"sessionId": metric["data"]["sessionId"]})
 
     with pg_client.PostgresClient() as cur:
         sub_queries = []
@@ -442,8 +451,8 @@ def update_card(metric_id, user_id, project_id, data: schemas.CardSchema):
         query = cur.mogrify(f"""\
             {"WITH " if len(sub_queries) > 0 else ""}{",".join(sub_queries)}
             UPDATE metrics
-            SET name = %(name)s, is_public= %(is_public)s, 
-                view_type= %(view_type)s, metric_type= %(metric_type)s, 
+            SET name = %(name)s, is_public= %(is_public)s,
+                view_type= %(view_type)s, metric_type= %(metric_type)s,
                 metric_of= %(metric_of)s, metric_value= %(metric_value)s,
                 metric_format= %(metric_format)s,
                 edited_at = timezone('utc'::text, now()),
@@ -452,8 +461,8 @@ def update_card(metric_id, user_id, project_id, data: schemas.CardSchema):
                 card_info = %(card_info)s,
                 data = %(session_data)s
             WHERE metric_id = %(metric_id)s
-            AND project_id = %(project_id)s 
-            AND (user_id = %(user_id)s OR is_public) 
+            AND project_id = %(project_id)s
+            AND (user_id = %(user_id)s OR is_public)
             RETURNING metric_id;""", params)
         cur.execute(query)
     return get_card(metric_id=metric_id, project_id=project_id, user_id=user_id)
@@ -473,7 +482,8 @@ def search_all(project_id, user_id, data: schemas.SearchCardsSchema, include_ser
         constraints.append("is_public")
 
     if data.query is not None and len(data.query) > 0:
-        constraints.append("(name ILIKE %(query)s OR owner.owner_email ILIKE %(query)s)")
+        constraints.append(
+            "(name ILIKE %(query)s OR owner.owner_email ILIKE %(query)s)")
         params["query"] = helper.values_for_operator(value=data.query,
                                                      op=schemas.SearchEventOperator.CONTAINS)
     with pg_client.PostgresClient() as cur:
@@ -486,7 +496,7 @@ def search_all(project_id, user_id, data: schemas.SearchCardsSchema, include_ser
                                                 ) AS metric_series ON (TRUE)"""
         query = cur.mogrify(
             f"""SELECT metric_id, project_id, user_id, name, is_public, created_at, edited_at,
-                        metric_type, metric_of, metric_format, metric_value, view_type, is_pinned, 
+                        metric_type, metric_of, metric_format, metric_value, view_type, is_pinned,
                         dashboards, owner_email, owner_name, default_config AS config, thumbnail
                 FROM metrics
                          {sub_join}
@@ -514,10 +524,12 @@ def search_all(project_id, user_id, data: schemas.SearchCardsSchema, include_ser
         if include_series:
             for r in rows:
                 for s in r["series"]:
-                    s["filter"] = helper.old_search_payload_to_flat(s["filter"])
+                    s["filter"] = helper.old_search_payload_to_flat(
+                        s["filter"])
         else:
             for r in rows:
-                r["created_at"] = TimeUTC.datetime_to_timestamp(r["created_at"])
+                r["created_at"] = TimeUTC.datetime_to_timestamp(
+                    r["created_at"])
                 r["edited_at"] = TimeUTC.datetime_to_timestamp(r["edited_at"])
         rows = helper.list_to_camel_case(rows)
     return rows
@@ -525,11 +537,13 @@ def search_all(project_id, user_id, data: schemas.SearchCardsSchema, include_ser
 
 def get_all(project_id, user_id):
     default_search = schemas.SearchCardsSchema()
-    rows = search_all(project_id=project_id, user_id=user_id, data=default_search)
+    rows = search_all(project_id=project_id,
+                      user_id=user_id, data=default_search)
     result = rows
     while len(rows) == default_search.limit:
         default_search.page += 1
-        rows = search_all(project_id=project_id, user_id=user_id, data=default_search)
+        rows = search_all(project_id=project_id,
+                          user_id=user_id, data=default_search)
         result += rows
 
     return result
@@ -563,15 +577,15 @@ def __get_path_analysis_attributes(row):
 def get_card(metric_id, project_id, user_id, flatten: bool = True, include_data: bool = False):
     with pg_client.PostgresClient() as cur:
         query = cur.mogrify(
-            f"""SELECT metric_id, project_id, user_id, name, is_public, created_at, deleted_at, edited_at, metric_type, 
-                        view_type, metric_of, metric_value, metric_format, is_pinned, default_config, 
+            f"""SELECT metric_id, project_id, user_id, name, is_public, created_at, deleted_at, edited_at, metric_type,
+                        view_type, metric_of, metric_value, metric_format, is_pinned, default_config,
                         default_config AS config,series, dashboards, owner_email, card_info
                         {',data' if include_data else ''}
                 FROM metrics
                          LEFT JOIN LATERAL (SELECT COALESCE(jsonb_agg(metric_series.* ORDER BY index),'[]'::jsonb) AS series
                                             FROM metric_series
                                             WHERE metric_series.metric_id = metrics.metric_id
-                                              AND metric_series.deleted_at ISNULL 
+                                              AND metric_series.deleted_at ISNULL
                                             ) AS metric_series ON (TRUE)
                          LEFT JOIN LATERAL (SELECT COALESCE(jsonb_agg(connected_dashboards.* ORDER BY is_public,name),'[]'::jsonb) AS dashboards
                                             FROM (SELECT dashboard_id, name, is_public
@@ -664,8 +678,10 @@ def get_funnel_sessions_by_issue(user_id, project_id, metric_id, issue_id,
         s.filter.endTimestamp = data.endTimestamp
         s.filter.limit = data.limit
         s.filter.page = data.page
-        issues_list = funnels.get_issues_on_the_fly_widget(project_id=project_id, data=s.filter).get("issues", {})
-        issues_list = issues_list.get("significant", []) + issues_list.get("insignificant", [])
+        issues_list = funnels.get_issues_on_the_fly_widget(
+            project_id=project_id, data=s.filter).get("issues", {})
+        issues_list = issues_list.get(
+            "significant", []) + issues_list.get("insignificant", [])
         issue = None
         for i in issues_list:
             if i.get("issueId", "") == issue_id:
@@ -688,10 +704,12 @@ def get_funnel_sessions_by_issue(user_id, project_id, metric_id, issue_id,
 
 
 def make_chart_from_card(project_id, user_id, metric_id, data: schemas.CardSessionsSchema):
-    raw_metric: dict = get_card(metric_id=metric_id, project_id=project_id, user_id=user_id, include_data=True)
+    raw_metric: dict = get_card(
+        metric_id=metric_id, project_id=project_id, user_id=user_id, include_data=True)
 
     if raw_metric is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="card not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="card not found")
     raw_metric["startTimestamp"] = data.startTimestamp
     raw_metric["endTimestamp"] = data.endTimestamp
     raw_metric["limit"] = data.limit
@@ -708,7 +726,8 @@ def make_chart_from_card(project_id, user_id, metric_id, data: schemas.CardSessi
                                                  session_id=raw_metric["data"]["sessionId"])
         else:
             return heatmaps.search_short_session(project_id=project_id,
-                                                 data=schemas.HeatMapSessionsSearch(**metric.model_dump()),
+                                                 data=schemas.HeatMapSessionsSearch(
+                                                     **metric.model_dump()),
                                                  user_id=user_id)
 
     return get_chart(project_id=project_id, data=metric, user_id=user_id)
@@ -742,3 +761,109 @@ def card_exists(metric_id, project_id, user_id) -> bool:
         cur.execute(query)
         row = cur.fetchone()
         return row is not None
+
+
+def get_web_vitals(project_id: int, **kwargs) -> dict:
+    """Get web vitals metrics like LCP, FID, CLS etc"""
+    with pg_client.PostgresClient() as cur:
+        query = cur.mogrify("""
+            WITH web_vitals AS (
+                SELECT 
+                    session_id,
+                    AVG(lcp) as avg_lcp,
+                    AVG(fid) as avg_fid, 
+                    AVG(cls) as avg_cls,
+                    AVG(ttfb) as avg_ttfb,
+                    AVG(fcp) as avg_fcp
+                FROM events_web_vitals
+                WHERE project_id = %(project_id)s
+                AND timestamp >= %(start_ts)s
+                AND timestamp <= %(end_ts)s
+                GROUP BY session_id
+            )
+            SELECT
+                ROUND(AVG(avg_lcp)) as lcp,
+                ROUND(AVG(avg_fid)) as fid,
+                ROUND(AVG(avg_cls), 3) as cls,
+                ROUND(AVG(avg_ttfb)) as ttfb,
+                ROUND(AVG(avg_fcp)) as fcp,
+                COUNT(*) as sessions_count
+            FROM web_vitals
+        """, {
+            "project_id": project_id,
+            "start_ts": kwargs.get("startTimestamp"),
+            "end_ts": kwargs.get("endTimestamp")
+        })
+
+        cur.execute(query)
+        results = helper.dict_to_camel_case(cur.fetchone())
+
+        ratings = {
+            "good": "good",
+            "needs_improvement": "needs improvement",
+            "poor": "poor"
+        }
+
+        results["lcpRating"] = ratings["good"] if results["lcp"] <= 2500 else \
+            ratings["needs_improvement"] if results["lcp"] <= 4000 else \
+            ratings["poor"]
+
+        results["fidRating"] = ratings["good"] if results["fid"] <= 100 else \
+            ratings["needs_improvement"] if results["fid"] <= 300 else \
+            ratings["poor"]
+
+        results["clsRating"] = ratings["good"] if results["cls"] <= 0.1 else \
+            ratings["needs_improvement"] if results["cls"] <= 0.25 else \
+            ratings["poor"]
+
+        return results
+
+
+def get_resources_metrics(project_id: int, **kwargs) -> dict:
+    """Get resource loading metrics like JS, CSS, images etc"""
+    with pg_client.PostgresClient() as cur:
+        query = cur.mogrify("""
+            WITH resources AS (
+                SELECT 
+                    session_id,
+                    type,
+                    duration,
+                    size
+                FROM events_resources 
+                WHERE project_id = %(project_id)s
+                AND timestamp >= %(start_ts)s 
+                AND timestamp <= %(end_ts)s
+            )
+            SELECT
+                type,
+                COUNT(*) as count,
+                ROUND(AVG(duration)) as avg_duration,
+                ROUND(AVG(size)) as avg_size,
+                ROUND(SUM(size)) as total_size
+            FROM resources
+            GROUP BY type
+        """, {
+            "project_id": project_id,
+            "start_ts": kwargs.get("startTimestamp"),
+            "end_ts": kwargs.get("endTimestamp")
+        })
+
+        cur.execute(query)
+        results = helper.list_to_camel_case(cur.fetchall())
+
+        resources = {
+            "summary": {
+                "totalCount": sum(r["count"] for r in results),
+                "totalSize": sum(r["totalSize"] for r in results),
+                "avgDuration": round(sum(r["avgDuration"] * r["count"] for r in results) /
+                                     sum(r["count"] for r in results))
+            },
+            "byType": {r["type"]: {
+                "count": r["count"],
+                "avgDuration": r["avgDuration"],
+                "avgSize": r["avgSize"],
+                "totalSize": r["totalSize"]
+            } for r in results}
+        }
+
+        return resources

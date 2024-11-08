@@ -23,7 +23,6 @@ print(f">Loglevel set to: {loglevel}")
 logging.basicConfig(level=loglevel)
 
 
-
 class ORPYAsyncConnection(AsyncConnection):
 
     def __init__(self, *args, **kwargs):
@@ -46,7 +45,8 @@ async def lifespan(app: FastAPI):
 
     ap_logger.info(">Scheduled jobs:")
     for job in app.schedule.get_jobs():
-        ap_logger.info({"Name": str(job.id), "Run Frequency": str(job.trigger), "Next Run": str(job.next_run_time)})
+        ap_logger.info({"Name": str(job.id), "Run Frequency": str(
+            job.trigger), "Next Run": str(job.next_run_time)})
 
     database = {
         "host": config("pg_host", default="localhost"),
@@ -58,7 +58,8 @@ async def lifespan(app: FastAPI):
     }
 
     database = psycopg_pool.AsyncConnectionPool(kwargs=database, connection_class=ORPYAsyncConnection,
-                                                min_size=config("PG_AIO_MINCONN", cast=int, default=1),
+                                                min_size=config(
+                                                    "PG_AIO_MINCONN", cast=int, default=1),
                                                 max_size=config("PG_AIO_MAXCONN", cast=int, default=5), )
     app.state.postgresql = database
 
@@ -72,8 +73,14 @@ async def lifespan(app: FastAPI):
     await pg_client.terminate()
 
 
-app = FastAPI(root_path=config("root_path", default="/api"), docs_url=config("docs_url", default=""),
-              redoc_url=config("redoc_url", default=""), lifespan=lifespan)
+app = FastAPI(
+    title="Akera OpenReplay API",
+    version="1.0.0",
+    root_path="/api",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan
+)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 
@@ -87,12 +94,14 @@ async def or_middleware(request: Request, call_next):
         logging.error(f"{request.method}: {request.url.path} FAILED!")
         raise
     if response.status_code // 100 != 2:
-        logging.warning(f"{request.method}:{request.url.path} {response.status_code}!")
+        logging.warning(f"{request.method}:{request.url.path} {
+                        response.status_code}!")
     if helper.TRACK_TIME:
         now = time.time() - now
         if now > 2:
             now = round(now, 2)
-            logging.warning(f"Execution time: {now} s for {request.method}: {request.url.path}")
+            logging.warning(f"Execution time: {now} s for {
+                            request.method}: {request.url.path}")
     response.headers["x-robots-tag"] = 'noindex, nofollow'
     return response
 
