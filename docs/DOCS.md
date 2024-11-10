@@ -34,6 +34,18 @@ cd scripts/helmcharts
 ./local_deploy.sh all
 ```
 
+### option 4: using docker-compose
+
+1. assuming you have docker and docker-compose installed on your machine, you can run the following command to start the project:
+
+```bash
+cd akera-openreplay/scripts/docker-compose
+```
+
+```bash
+./install.sh
+```
+
 ## OpenAPI documentation for the API
 
 - you can use this [link](https://stellar-muffin-df743e.netlify.app/#tag/reset-password/operation/reset_password_handler_password_reset_link_post) to see the API documentation online.
