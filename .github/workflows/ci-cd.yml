@@ -1,0 +1,151 @@
+name: OpenReplay CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_REPO: index.docker.io/aymanepraxe #TODO: use a akera registry
+      IMAGE_TAG: ${{ github.sha }}
+      KUBE_NAMESPACE: app
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v2
+        with:
+          registry: index.docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Backend Images
+        run: |
+          cd backend
+          IMAGE_TAG=${{ env.IMAGE_TAG }} PUSH_IMAGE=1 DOCKER_REPO=${{ env.DOCKER_REPO }} bash build.sh
+        shell: bash
+
+      - name: Build and Push Frontend Image
+        run: |
+          cd frontend
+          IMAGE_TAG=${{ env.IMAGE_TAG }} PUSH_IMAGE=1 DOCKER_REPO=${{ env.DOCKER_REPO }} bash build.sh
+        shell: bash
+
+      - name: Install yq
+        run: |
+          sudo add-apt-repository ppa:rmescandon/yq -y
+          sudo apt-get update
+          sudo apt-get install yq -y
+        shell: bash
+
+      - name: Generate Random Secrets
+        id: generate_secrets
+        shell: bash
+        run: |
+          ASSIST_KEY=$(openssl rand -hex 20)
+          ASSIST_JWT_SECRET=$(openssl rand -hex 20)
+          JWT_SECRET=$(openssl rand -hex 20)
+          JWT_SPOT_SECRET=$(openssl rand -hex 20)
+          MINIO_ACCESS_KEY=$(openssl rand -hex 20)
+          MINIO_SECRET_KEY=$(openssl rand -hex 20)
+          POSTGRES_PASSWORD=$(openssl rand -hex 20)
+          echo "assist_key=$ASSIST_KEY" >> $GITHUB_OUTPUT
+          echo "assist_jwt_secret=$ASSIST_JWT_SECRET" >> $GITHUB_OUTPUT
+          echo "jwt_secret=$JWT_SECRET" >> $GITHUB_OUTPUT
+          echo "jwt_spot_secret=$JWT_SPOT_SECRET" >> $GITHUB_OUTPUT
+          echo "minio_access_key=$MINIO_ACCESS_KEY" >> $GITHUB_OUTPUT
+          echo "minio_secret_key=$MINIO_SECRET_KEY" >> $GITHUB_OUTPUT
+          echo "postgres_password=$POSTGRES_PASSWORD" >> $GITHUB_OUTPUT
+
+      - name: Update Helm Chart Values
+        run: |
+          cd scripts/helmcharts
+
+
+          yq e '.global.assistKey = "${{ steps.generate_secrets.outputs.assist_key }}"' -i vars.yaml
+          yq e '.global.assistJWTSecret = "${{ steps.generate_secrets.outputs.assist_jwt_secret }}"' -i vars.yaml
+          yq e '.global.jwtSecret = "${{ steps.generate_secrets.outputs.jwt_secret }}"' -i vars.yaml
+          yq e '.global.jwtSpotSecret = "${{ steps.generate_secrets.outputs.jwt_spot_secret }}"' -i vars.yaml
+
+
+          yq e '.minio.global.minio.accessKey = "${{ steps.generate_secrets.outputs.minio_access_key }}"' -i vars.yaml
+          yq e '.minio.global.minio.secretKey = "${{ steps.generate_secrets.outputs.minio_secret_key }}"' -i vars.yaml
+          yq e '.global.s3.accessKey = "${{ steps.generate_secrets.outputs.minio_access_key }}"' -i vars.yaml
+          yq e '.global.s3.secretKey = "${{ steps.generate_secrets.outputs.minio_secret_key }}"' -i vars.yaml
+
+
+          yq e '.postgresql.postgresqlPassword = "${{ steps.generate_secrets.outputs.postgres_password }}"' -i vars.yaml
+
+
+          yq e '.global.domainName = "openreplay.akera.com"' -i vars.yaml  # TODO: Replace with the prod domain and use it w github secret
+
+
+          yq e '.global.openReplayContainerRegistry = "${{ env.DOCKER_REPO }}"' -i vars.yaml
+
+          # SSL redirection
+          yq e '.ingress-nginx.controller.config.ssl-redirect = true' -i vars.yaml
+          yq e '.ingress-nginx.controller.config.force-ssl-redirect = true' -i vars.yaml
+
+          # i'll write cmnt here
+          yq e '.alerts.image.repository = "${{ env.DOCKER_REPO }}/alerts"' -i vars.yaml
+          yq e '.alerts.image.tag = "${{ env.IMAGE_TAG }}"' -i vars.yaml
+          yq e '.alerts.imagePullSecrets[0].name = "my-registry-secret"' -i vars.yaml
+
+          yq e '.frontend.image.repository = "${{ env.DOCKER_REPO }}/frontend"' -i vars.yaml
+          yq e '.frontend.image.tag = "${{ env.IMAGE_TAG }}"' -i vars.yaml
+          yq e '.frontend.imagePullSecrets[0].name = "my-registry-secret"' -i vars.yaml
+
+        shell: bash
+
+      - name: Set up Kubernetes
+        uses: azure/setup-kubectl@v3
+        with:
+          version: "latest"
+
+      - name: Configuring Kubernetes Credentials
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+        shell: bash
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: "v3.9.0"
+
+      - name: Deploy to Kubernetes with Helm
+        run: |
+          cd scripts/helmcharts
+
+
+          kubectl create secret docker-registry my-registry-secret \
+            --docker-server=index.docker.io \
+            --docker-username=${{ secrets.DOCKER_USERNAME }} \
+            --docker-password=${{ secrets.DOCKER_PASSWORD }} \
+            --docker-email=${{ secrets.DOCKER_EMAIL }} \
+            -n ${{ env.KUBE_NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+
+          helm upgrade --install databases ./databases -n db --create-namespace --wait -f vars.yaml --atomic
+
+
+          helm upgrade --install openreplay ./openreplay -n ${{ env.KUBE_NAMESPACE }} --create-namespace --wait -f vars.yaml --atomic
+        shell: bash
+
+      - name: Post-Deployment Verification
+        run: |
+          kubectl rollout status deployment/frontend -n ${{ env.KUBE_NAMESPACE }} --timeout=120s
+          kubectl rollout status deployment/alerts -n ${{ env.KUBE_NAMESPACE }} --timeout=120s
+          # Add additional checks for other deployments if necessary
+        shell: bash
