@@ -33,7 +33,6 @@ Default.args = {
   user: {
     imageUrl: "/images/user.png",
     name: "John Doe",
-    email: "john.doe@example.com",
     status: true,
   },
   size: "md",
@@ -44,7 +43,6 @@ export const Loading = Template.bind({});
 Loading.args = {
   user: {
     name: "Jane Smith",
-    email: "jane.smith@example.com",
     status: true,
   },
   isLoading: true,
@@ -55,7 +53,6 @@ export const NoImage = Template.bind({});
 NoImage.args = {
   user: {
     name: "Sam Wilson",
-    email: "sam.wilson@example.com",
     status: false,
   },
   size: "lg",
@@ -67,7 +64,6 @@ StatusActive.args = {
   user: {
     imageUrl: "/images/user.png",
     name: "Alice Brown",
-    email: "alice.brown@example.com",
     status: true,
   },
   size: "xl",
@@ -78,20 +74,7 @@ StatusInactive.args = {
   user: {
     imageUrl: "/images/user.png",
     name: "Bob Green",
-    email: "bob.green@example.com",
     status: false,
   },
   size: "xl",
-};
-
-export const CustomClassName = Template.bind({});
-CustomClassName.args = {
-  user: {
-    name: "Charlie Black",
-    email: "charlie.black@example.com",
-    status: true,
-  },
-  size: "md",
-  fallbackText: "CB",
-  className: "ring-2 ring-blue-500",
 };

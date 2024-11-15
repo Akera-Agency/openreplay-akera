@@ -12,7 +12,6 @@ type AvatarProps = {
   user?: {
     imageUrl?: string;
     name?: string;
-    email?: string;
     status?: boolean;
   };
   fallbackText?: string;
@@ -44,8 +43,8 @@ const Avatar = ({
   className,
 }: AvatarProps) => {
   const statusClasses = {
-    true: "bg-green-500 ring-2 ring-white",
-    false: "bg-gray-400 ring-2 ring-white",
+    true: "bg-emerald-600 ring-2 ring-primary-foreground",
+    false: "bg-neutral-400 ring-2 ring-primary-foreground",
   };
 
   const status =
@@ -61,7 +60,14 @@ const Avatar = ({
             className="object-cover"
           />
         ) : (
-          <AvatarFallback className="text-sm font-medium">
+          <AvatarFallback
+            className={cn(
+              "text-sm font-medium",
+              isLoading
+                ? "bg-tag-hover text-secondary-text"
+                : "bg-ring text-white",
+            )}
+          >
             {isLoading ? (
               <Loader2 className="h-6 w-6 animate-spin" />
             ) : (
