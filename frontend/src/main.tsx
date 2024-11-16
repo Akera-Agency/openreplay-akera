@@ -4,12 +4,15 @@ import App from "./app";
 
 import "@/assets/fonts/interVF.ttf";
 import "./styles/global.css";
+import { SidebarProvider } from "./shadcn-components/sidebar";
 
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement!);
 
 root.render(
   <React.StrictMode>
-    <App />
+    <SidebarProvider>
+      <App />
+    </SidebarProvider>
   </React.StrictMode>,
 );
