@@ -98,6 +98,7 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 12 89% 57%;
     --sidebar-active-item: 26 100% 97%;
+    --sidebar-separator: 0 0% 90%;
   }
 
   .dark {
@@ -185,6 +186,7 @@ body {
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 12 89% 57%;
     --sidebar-active-item: 0;
+    --sidebar-separator: 240 5% 26%;
   }
 }
 
