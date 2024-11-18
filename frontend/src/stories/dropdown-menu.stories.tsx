@@ -2,7 +2,7 @@ import React from "react";
 import type { Meta, StoryFn } from "@storybook/react";
 import { DropdownMenu } from "@/components/dropdown/dropdown-menu";
 import { Button } from "@/components/button/button";
-import { Circle, Cog, LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings, User } from "lucide-react";
 
 export default {
   title: "Components/DropdownMenu",
