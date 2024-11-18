@@ -1,0 +1,203 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Inter";
+  src: url("@/assets/fonts/interVF.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+}
+body {
+  font-family: "Inter", sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+
+    --border: 0 0% 83%;
+    --input: 0 0% 89.8%;
+    --input-background: 0 0% 100%;
+    --input-placeholder: 0 0% 45%;
+    --input-border: 0 0% 83%;
+
+    --tag-hover: 0 0% 96%;
+
+    --calendar: 0 0% 100%;
+    --calendar-hover: 26 100% 97%;
+
+    --secondary-text: 0 0% 45%;
+
+    --accordion-description: 0 0% 45%;
+    --accordion-background-hover: 0 0% 96%;
+
+    --alert-bg: 0 0% 100%;
+    --alert-description: 0 0% 45%;
+    --alert-destructive: 0 74% 42%;
+    --alert-border-destructive: 0 91% 71%;
+    --alert-border-warning: 32 95% 44%;
+    --alert-bg-destructive: 0 86% 97%;
+    --alert-bg-success: 152 81% 96%;
+    --alert-bg-warning: 55 92% 95%;
+    --alert-success: 163 88% 20%;
+    --alert-warning: 28 73% 26%;
+
+    --badge-soft: 240 5% 96%;
+    --badge-outline-border: 0 0% 83%;
+    --badge-outline-foreground: 0 0% 45%;
+    --badge-surface: 0 0% 94%;
+    --badge-surface-border: 240 6% 90%;
+    --badge-surface-foreground: 0 0% 45%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+
+    --primary-orange: 12 89% 57%;
+
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 72% 51%;
+    --destructive-hover: 0 70% 35%;
+    --destructive-foreground: 0 0% 98%;
+
+    --ring: 12 89% 57%;
+
+    --radius: 0.5rem;
+
+    --chart-1: 12 76% 61%;
+
+    --chart-2: 173 58% 39%;
+
+    --chart-3: 197 37% 24%;
+
+    --chart-4: 43 74% 66%;
+
+    --chart-5: 27 87% 67%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 12 89% 57%;
+    --sidebar-active-item: 26 100% 97%;
+    --sidebar-separator: 0 0% 90%;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --input-background: 0 0% 15%;
+    --input-placeholder: 0 0% 83%;
+    --input-border: 0 0% 25%;
+
+    --tag-hover: 0 0% 9%;
+
+    --calendar: 0 0% 15%;
+    --calendar-hover: 26 100% 26%;
+
+    --secondary-text: 0 0% 83%;
+
+    --accordion-description: 0 0% 83%;
+    --accordion-background-hover: 0 0% 15%;
+
+    --alert-bg: 0 0% 15%;
+    --alert-description: 0 0% 83%;
+    --alert-destructive: 0 94% 82%;
+    --alert-border-destructive: 0 94% 82%;
+    --alert-border-warning: 43 96% 56%;
+    --alert-bg-destructive: 0 86% 5%;
+    --alert-bg-success: 166 100% 5%;
+    --alert-bg-warning: 44 100% 5%;
+    --alert-success: 158 64% 52%;
+    --alert-warning: 50 98% 64%;
+
+    --badge-soft: 0 0% 9%;
+    --badge-outline-border: 0 0% 25%;
+    --badge-outline-foreground: 0 0% 83%;
+    --badge-surface: 240 5% 96% 10%;
+    --badge-surface-border: 0 0% 25%;
+    --badge-surface-foreground: 0 0% 83%;
+
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+
+    --primary-orange: 12 89% 57%;
+
+    --secondary: 0 0% 9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --destructive: 0 94% 82%;
+    --destructive-hover: 0 70% 35%;
+    --destructive-foreground: 0 0% 98%;
+
+    --ring: 12 89% 57%;
+
+    --radius: 0.5rem;
+
+    --chart-1: 220 70% 50%;
+
+    --chart-2: 160 60% 45%;
+
+    --chart-3: 30 80% 55%;
+
+    --chart-4: 280 65% 60%;
+
+    --chart-5: 340 75% 55%;
+
+    --sidebar-background: 0 0% 15%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 12 89% 57%;
+    --sidebar-active-item: 0;
+    --sidebar-separator: 240 5% 26%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+  }
+}
