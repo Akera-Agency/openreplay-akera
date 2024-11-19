@@ -31,7 +31,7 @@ const BarChart = ({
   return (
     <ChartContainer config={config} className={cn("w-full", className)}>
       <RechartsBarChart data={data} className="text-xs">
-        <CartesianGrid vertical={false} className="!stroke-moderator-border" />
+        <CartesianGrid vertical={false} />
         <XAxis
           dataKey={xAxisKey}
           tickLine={false}

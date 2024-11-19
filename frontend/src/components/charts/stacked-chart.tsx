@@ -26,8 +26,8 @@ const StackedBarChart = ({
 }: StackedBarChartProps) => {
   return (
     <ChartContainer config={config} className={cn("w-full", className)}>
-      <BarChart data={data} className="">
-        <CartesianGrid vertical={false} className="!stroke-moderator-border" />
+      <BarChart data={data}>
+        <CartesianGrid vertical={false} />
         <XAxis
           dataKey={xAxisKey}
           tickLine={false}
@@ -42,12 +42,7 @@ const StackedBarChart = ({
           axisLine={false}
         />
         <ChartTooltip
-          content={
-            <ChartTooltipContent
-              className="bg-input-bg-color min-w-[10rem]"
-              hideLabel
-            />
-          }
+          content={<ChartTooltipContent className="min-w-[10rem]" hideLabel />}
         />
         <ChartLegend
           className="mt-3 justify-start px-8"
