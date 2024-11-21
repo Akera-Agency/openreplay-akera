@@ -27,7 +27,7 @@ const meta: Meta<typeof DonutChart> = {
 export default meta;
 
 const Template: StoryFn<typeof DonutChart> = (args) => (
-  <div className="mx-auto max-w-[400px] rounded-md border">
+  <div className="mx-auto max-w-[400px]">
     <DonutChart {...args} />
   </div>
 );
@@ -69,7 +69,7 @@ Default.args = {
       color: "hsl(var(--chart-5))",
     },
   },
-  innerRadius: 80,
+  innerRadius: 60,
   footerText: "Trending up by 5.2% this month",
   footerSubtext: "Showing total visitors for the last 6 months",
   footerIcon: <TrendingUp className="h-4 w-4" />,
@@ -78,5 +78,5 @@ Default.args = {
 export const CustomInnerRadius = Template.bind({});
 CustomInnerRadius.args = {
   ...Default.args,
-  innerRadius: 100,
+  innerRadius: 40,
 };

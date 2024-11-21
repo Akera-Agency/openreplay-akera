@@ -1,11 +1,11 @@
 import type { Meta, StoryFn } from "@storybook/react";
 import BarChart from "@/components/charts/bar-chart";
 import type { ChartConfig } from "@/shadcn-components/chart";
+import { TrendingUp } from "lucide-react";
 
 const meta: Meta = {
   title: "Components/Charts/BarChart",
   component: BarChart,
-
   parameters: {
     backgrounds: {
       default: "light",
@@ -35,7 +35,7 @@ const defaultConfig: ChartConfig = {
 };
 
 const Template: StoryFn = (args) => (
-  <div className="mx-auto w-full max-w-[400px] rounded-md border p-4">
+  <div className="mx-auto w-full max-w-[400px]">
     <BarChart
       data={defaultData}
       config={defaultConfig}
@@ -48,25 +48,15 @@ const Template: StoryFn = (args) => (
 
 export const Default = Template.bind({});
 Default.args = {
+  title: "Bar Chart",
+  description: "January - June 2024",
+  footerText: "Trending up by 5.2% this month",
+  footerSubtext: "Showing total visitors for the last 6 months",
+  footerIcon: <TrendingUp className="h-4 w-4" />,
   data: defaultData,
   config: defaultConfig,
   xAxisKey: "name",
   dataKey: "value",
   className: "",
-};
-
-export const CustomColors = Template.bind({});
-CustomColors.args = {
-  data: [
-    { name: "Q1", sales: 100 },
-    { name: "Q2", sales: 200 },
-    { name: "Q3", sales: 300 },
-    { name: "Q4", sales: 400 },
-  ],
-  config: {
-    sales: { color: "#10B981" },
-  },
-  xAxisKey: "name",
-  dataKey: "sales",
-  className: "custom-chart-class",
+  textAlign: "start",
 };

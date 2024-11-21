@@ -2,6 +2,7 @@ import React from "react";
 import type { Meta, StoryFn } from "@storybook/react";
 import StackedBarChart from "@/components/charts/stacked-chart";
 import type { ChartConfig } from "@/shadcn-components/chart";
+import { TrendingUp } from "lucide-react";
 
 const meta: Meta = {
   title: "Components/Charts/StackedBarChart",
@@ -33,7 +34,7 @@ const defaultConfig: ChartConfig = {
 };
 
 const Template: StoryFn<typeof StackedBarChart> = (args) => (
-  <div className="mx-auto w-full max-w-[400px] rounded-md border p-4">
+  <div className="mx-auto w-full max-w-[400px]">
     <StackedBarChart {...args} />
   </div>
 );
@@ -45,21 +46,10 @@ Default.args = {
   xAxisKey: "name",
   dataKeys: ["sales", "profit"],
   className: "",
-};
-
-export const CustomColors = Template.bind({});
-CustomColors.args = {
-  data: [
-    { name: "Q1", revenue: 300, expenses: 150 },
-    { name: "Q2", revenue: 400, expenses: 200 },
-    { name: "Q3", revenue: 350, expenses: 170 },
-    { name: "Q4", revenue: 500, expenses: 250 },
-  ],
-  config: {
-    revenue: { label: "Revenue", color: "#F59E0B" },
-    expenses: { label: "Expenses", color: "#EF4444" },
-  },
-  xAxisKey: "name",
-  dataKeys: ["revenue", "expenses"],
-  className: "custom-chart-class",
+  title: "Stacked Bars Chart",
+  description: "January - June 2024",
+  footerText: "Trending up by 5.2% this month",
+  footerSubtext: "Showing total visitors for the last 6 months",
+  footerIcon: <TrendingUp className="h-4 w-4" />,
+  textAlign: "start",
 };

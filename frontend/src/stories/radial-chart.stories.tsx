@@ -29,7 +29,7 @@ const meta: Meta<typeof RadialChart> = {
 export default meta;
 
 const Template: StoryFn<typeof RadialChart> = (args) => (
-  <div className="mx-auto max-w-[400px] rounded-md border">
+  <div className="mx-auto max-w-[400px]">
     <RadialChart {...args} />
   </div>
 );

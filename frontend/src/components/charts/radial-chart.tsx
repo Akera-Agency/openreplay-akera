@@ -1,19 +1,12 @@
 import { RadialBar, RadialBarChart } from "recharts";
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/shadcn-components/card";
-import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/shadcn-components/chart";
+import ChartCard from "../card/chart-card";
 
 type RadialChartProps = {
   title: string;
@@ -41,42 +34,30 @@ const RadialChart = ({
   footerIcon,
 }: RadialChartProps) => {
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
-        <CardTitle>{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
-      </CardHeader>
-      <CardContent className="flex-1 pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
+    <ChartCard
+      title={title}
+      description={description}
+      footerText={footerText}
+      footerSubtext={footerSubtext}
+      footerIcon={footerIcon}
+    >
+      <ChartContainer
+        config={chartConfig}
+        className="mx-auto aspect-square max-h-[250px]"
+      >
+        <RadialBarChart
+          data={chartData}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius}
         >
-          <RadialBarChart
-            data={chartData}
-            innerRadius={innerRadius}
-            outerRadius={outerRadius}
-          >
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel nameKey="browser" />}
-            />
-            <RadialBar dataKey={dataKey} background />
-          </RadialBarChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        {footerText && (
-          <div className="flex items-center gap-2 font-medium leading-none">
-            {footerText} {footerIcon}
-          </div>
-        )}
-        {footerSubtext && (
-          <div className="leading-none text-muted-foreground">
-            {footerSubtext}
-          </div>
-        )}
-      </CardFooter>
-    </Card>
+          <ChartTooltip
+            cursor={false}
+            content={<ChartTooltipContent hideLabel nameKey="browser" />}
+          />
+          <RadialBar dataKey={dataKey} background />
+        </RadialBarChart>
+      </ChartContainer>
+    </ChartCard>
   );
 };
 

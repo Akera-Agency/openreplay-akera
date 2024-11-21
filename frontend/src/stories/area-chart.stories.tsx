@@ -28,7 +28,7 @@ const meta: Meta<typeof AreaChartComponent> = {
 export default meta;
 
 const Template: StoryFn<typeof AreaChartComponent> = (args) => (
-  <div className="mx-auto max-w-[400px] rounded-md border">
+  <div className="mx-auto max-w-[400px]">
     <AreaChartComponent {...args} />
   </div>
 );
@@ -60,4 +60,5 @@ Default.args = {
   footerText: "Trending up by 5.2% this month",
   footerSubtext: "January - June 2024",
   footerIcon: <TrendingUp className="h-4 w-4" />,
+  textAlign: "start",
 };

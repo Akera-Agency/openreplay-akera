@@ -26,7 +26,7 @@ const meta: Meta<typeof PieChart> = {
 export default meta;
 
 const Template: StoryFn<typeof PieChart> = (args) => (
-  <div className="mx-auto max-w-[400px] rounded-md border">
+  <div className="mx-auto max-w-[400px]">
     <PieChart {...args} />
   </div>
 );
