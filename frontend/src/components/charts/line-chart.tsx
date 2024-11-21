@@ -8,6 +8,8 @@ import {
 import {
   type ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/shadcn-components/chart";
@@ -77,6 +79,7 @@ const LineChart = ({
               dot={false}
             />
           ))}
+          <ChartLegend content={<ChartLegendContent />} />
         </RechartsLineChart>
       </ChartContainer>
     </ChartCard>
