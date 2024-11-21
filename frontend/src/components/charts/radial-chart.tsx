@@ -1,4 +1,4 @@
-import { Pie, PieChart } from "recharts";
+import { RadialBar, RadialBarChart } from "recharts";
 
 import {
   Card,
@@ -15,49 +15,53 @@ import {
   ChartTooltipContent,
 } from "@/shadcn-components/chart";
 
-interface DonutChartProps {
+interface RadialChartProps {
+  title: string;
+  description?: string;
   chartData: Array<{ [key: string]: any }>;
   chartConfig: ChartConfig;
   dataKey: string;
-  title?: string;
-  description?: string;
   innerRadius?: number;
+  outerRadius?: number;
   footerText?: string;
   footerSubtext?: string;
   footerIcon?: React.ReactNode;
 }
 
-const DonutChart = ({
+const RadialChart = ({
   title,
   description,
-  dataKey,
   chartData,
   chartConfig,
-  innerRadius = 80,
+  dataKey,
+  innerRadius = 30,
+  outerRadius = 110,
   footerText,
   footerSubtext,
   footerIcon,
-}: DonutChartProps) => {
+}: RadialChartProps) => {
   return (
     <Card className="flex flex-col">
-      {title && (
-        <CardHeader className="items-center pb-0">
-          <CardTitle>{title}</CardTitle>
-          {description && <CardDescription>{description}</CardDescription>}
-        </CardHeader>
-      )}
+      <CardHeader className="items-center pb-0">
+        <CardTitle>{title}</CardTitle>
+        {description && <CardDescription>{description}</CardDescription>}
+      </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
           className="mx-auto aspect-square max-h-[250px]"
         >
-          <PieChart>
+          <RadialBarChart
+            data={chartData}
+            innerRadius={innerRadius}
+            outerRadius={outerRadius}
+          >
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={<ChartTooltipContent hideLabel nameKey="browser" />}
             />
-            <Pie data={chartData} dataKey={dataKey} innerRadius={innerRadius} />
-          </PieChart>
+            <RadialBar dataKey={dataKey} background />
+          </RadialBarChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
@@ -76,4 +80,4 @@ const DonutChart = ({
   );
 };
 
-export default DonutChart;
+export default RadialChart;
