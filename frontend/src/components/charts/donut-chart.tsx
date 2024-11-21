@@ -15,7 +15,7 @@ import {
   ChartTooltipContent,
 } from "@/shadcn-components/chart";
 
-interface DonutChartProps {
+type DonutChartProps = {
   chartData: Array<{ [key: string]: any }>;
   chartConfig: ChartConfig;
   dataKey: string;
@@ -25,7 +25,7 @@ interface DonutChartProps {
   footerText?: string;
   footerSubtext?: string;
   footerIcon?: React.ReactNode;
-}
+};
 
 const DonutChart = ({
   title,

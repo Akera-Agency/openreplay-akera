@@ -17,7 +17,7 @@ import {
   ChartTooltipContent,
 } from "@/shadcn-components/chart";
 
-interface PieChartProps {
+type PieChartProps = {
   chartData: Array<{ [key: string]: any }>;
   chartConfig: ChartConfig;
   dataKey: string;
@@ -26,7 +26,7 @@ interface PieChartProps {
   footerText?: string;
   footerSubtext?: string;
   footerIcon?: React.ReactNode;
-}
+};
 
 const PieChart = ({
   title,

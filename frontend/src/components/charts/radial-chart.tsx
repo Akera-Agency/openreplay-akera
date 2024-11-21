@@ -15,7 +15,7 @@ import {
   ChartTooltipContent,
 } from "@/shadcn-components/chart";
 
-interface RadialChartProps {
+type RadialChartProps = {
   title: string;
   description?: string;
   chartData: Array<{ [key: string]: any }>;
@@ -26,7 +26,7 @@ interface RadialChartProps {
   footerText?: string;
   footerSubtext?: string;
   footerIcon?: React.ReactNode;
-}
+};
 
 const RadialChart = ({
   title,
